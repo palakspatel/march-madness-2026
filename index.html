@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Palak's 2026 March Madness Bracket</title>
+<meta name="description" content="Data-driven March Madness bracket picks — Arizona to win it all.">
+<meta property="og:title" content="Palak's 2026 March Madness Bracket">
+<meta property="og:description" content="Arizona wins it all. 9 first-round upsets. Data-driven picks for every game.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#08080d;--card:rgba(255,255,255,0.03);--border:rgba(255,255,255,0.07);--text:#e4e4e7;--dim:rgba(255,255,255,0.4);--dimmer:rgba(255,255,255,0.2);--green:#4ade80;--gold:#e8a735;--red:#f87171;--arizona:#CC0033;--duke:#003087;--michigan:#FFCB05;--houston:#C8102E}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* Header */
+.header{text-align:center;padding:32px 16px 20px;position:relative}
+.header::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:120px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.subtitle{font-size:10px;letter-spacing:5px;color:var(--dim);text-transform:uppercase;margin-bottom:6px}
+.title{font-size:clamp(28px,5vw,42px);font-weight:700;background:linear-gradient(135deg,var(--arizona),var(--gold),var(--duke));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-1px;line-height:1.1}
+.tagline{font-size:13px;color:var(--dim);margin-top:6px}
+.score-banner{display:inline-block;margin-top:12px;padding:8px 20px;background:linear-gradient(135deg,rgba(204,0,51,0.15),rgba(255,203,5,0.1));border:1px solid rgba(204,0,51,0.25);border-radius:8px;font-size:18px;font-weight:700;color:var(--green)}
+
+/* Tracker bar */
+.tracker{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;padding:16px;margin:0 auto;max-width:700px}
+.tracker-stat{text-align:center;min-width:80px}
+.tracker-stat .num{font-size:24px;font-weight:700}
+.tracker-stat .label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+.tracker-stat.correct .num{color:var(--green)}
+.tracker-stat.wrong .num{color:var(--red)}
+.tracker-stat.pending .num{color:var(--dim)}
+
+/* Nav */
+.nav{display:flex;gap:6px;justify-content:center;padding:8px 16px 16px;flex-wrap:wrap}
+.nav button{background:transparent;border:1px solid var(--border);color:var(--dim);padding:7px 16px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit;text-transform:uppercase;letter-spacing:1.5px;transition:all .2s}
+.nav button:hover{border-color:rgba(255,255,255,0.2);color:var(--text)}
+.nav button.active{background:rgba(255,255,255,0.08);color:#fff;border-color:rgba(255,255,255,0.15)}
+
+/* Grid */
+.regions-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;padding:0 12px 24px;max-width:1300px;margin:0 auto}
+
+/* Region card */
+.region{border-radius:8px;overflow:hidden}
+.region-header{padding:10px 14px;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
+.region-body{background:var(--card);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;padding:10px}
+.round-label{font-size:10px;font-weight:600;color:var(--dimmer);text-transform:uppercase;letter-spacing:1.5px;margin:10px 0 4px;padding-top:8px;border-top:1px solid var(--border)}
+.round-label:first-child{border-top:none;margin-top:0;padding-top:0}
+
+/* Game card */
+.game{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:5px;padding:7px 10px;margin-bottom:5px;position:relative;transition:all .15s}
+.game.upset{border-color:rgba(232,167,53,0.3)}
+.game.correct{border-color:rgba(74,222,128,0.3);background:rgba(74,222,128,0.03)}
+.game.wrong{border-color:rgba(248,113,113,0.3);background:rgba(248,113,113,0.03)}
+.game-teams{display:flex;flex-direction:column;gap:1px}
+.team{font-size:12.5px;display:flex;justify-content:space-between;align-items:center;padding:1px 0}
+.team.picked{color:var(--green);font-weight:600}
+.team.not-picked{color:var(--dimmer)}
+.team .actual-result{font-size:9px;padding:1px 5px;border-radius:3px;font-weight:600}
+.team .actual-result.w{background:rgba(74,222,128,0.15);color:var(--green)}
+.team .actual-result.l{background:rgba(248,113,113,0.1);color:var(--red)}
+.game-note{font-size:10px;color:var(--dimmer);margin-top:3px;line-height:1.3}
+.upset-badge{font-size:9px;color:var(--gold);font-weight:700;margin-left:6px}
+.result-controls{display:flex;gap:3px;margin-top:5px}
+.result-controls button{font-size:9px;padding:2px 8px;border-radius:3px;border:1px solid var(--border);background:transparent;color:var(--dim);cursor:pointer;font-family:inherit;transition:all .15s}
+.result-controls button:hover{background:rgba(255,255,255,0.06);color:var(--text)}
+.result-controls button.set{background:rgba(74,222,128,0.1);border-color:rgba(74,222,128,0.3);color:var(--green)}
+
+/* Final Four */
+.ff-container{max-width:650px;margin:0 auto;padding:0 16px 24px}
+.ff-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:12px}
+.ff-label{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;font-weight:600}
+.ff-matchup{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:12px}
+.ff-team{font-size:16px;padding:2px 0;display:flex;justify-content:space-between}
+.ff-team.winner{color:var(--green);font-weight:700}
+.ff-team.loser{color:var(--dimmer)}
+.ff-note{font-size:11px;color:var(--dimmer);margin-top:6px;line-height:1.4}
+.championship{border-top:2px solid var(--gold);padding-top:16px;margin-top:4px}
+.champ-score{font-size:28px;font-weight:700;color:var(--green);margin-bottom:6px}
+.champ-detail{font-size:12px;color:rgba(255,255,255,0.5);line-height:1.5}
+
+/* Strategy */
+.strategy-container{max-width:700px;margin:0 auto;padding:0 16px 24px}
+.strat-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:10px}
+.strat-title{font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px}
+.strat-body{font-size:12px;color:rgba(255,255,255,0.55);line-height:1.7}
+.strat-body strong{color:#fff}
+.strat-body p{margin-bottom:8px}
+.upset-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.upset-stat{background:rgba(255,255,255,0.03);border-radius:5px;padding:8px;text-align:center}
+.upset-stat .val{font-size:16px;font-weight:700;color:var(--gold)}
+.upset-stat .lbl{font-size:10px;color:var(--dimmer);margin-top:2px}
+
+/* Share */
+.share-bar{text-align:center;padding:12px;border-top:1px solid var(--border);margin-top:12px}
+.share-bar button{background:linear-gradient(135deg,var(--arizona),#8B0000);color:#fff;border:none;padding:10px 24px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;letter-spacing:1px;transition:transform .1s}
+.share-bar button:hover{transform:scale(1.03)}
+.share-bar button:active{transform:scale(0.98)}
+
+/* Path lines */
+.path-item{padding-left:12px;border-left:3px solid;margin-bottom:10px}
+.path-team{font-size:14px;font-weight:700}
+.path-route{font-size:11px;color:var(--dimmer);margin-top:2px}
+
+/* Footer */
+.footer{text-align:center;padding:20px;font-size:10px;color:var(--dimmer);border-top:1px solid var(--border);margin-top:20px}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="subtitle">Palak's 2026 March Madness Bracket</div>
+  <div class="title">ARIZONA WILDCATS</div>
+  <div class="tagline">National Champions · Data-Driven Picks · 9 First-Round Upsets</div>
+  <div class="score-banner">🏆 Arizona 74, Michigan 68</div>
+</div>
+
+<div class="tracker" id="tracker">
+  <div class="tracker-stat correct"><div class="num" id="t-correct">—</div><div class="label">Correct</div></div>
+  <div class="tracker-stat wrong"><div class="num" id="t-wrong">—</div><div class="label">Wrong</div></div>
+  <div class="tracker-stat pending"><div class="num" id="t-pending">67</div><div class="label">Pending</div></div>
+  <div class="tracker-stat"><div class="num" id="t-pct">—</div><div class="label">Accuracy</div></div>
+</div>
+
+<div class="nav" id="nav"></div>
+<div id="content"></div>
+
+<div class="share-bar">
+  <button onclick="shareBracket()">📋 Copy Link to Share</button>
+  <button onclick="resetResults()" style="background:transparent;border:1px solid var(--border);color:var(--dim);margin-left:8px">Reset Results</button>
+</div>
+
+<div class="footer">
+  Built with data from KenPom, BartTorvik, Kalshi, ESPN, and Harvard Sports Analysis · Arizona +400 value play<br>
+  Pool strategy: Differentiate from Big Ten–heavy Northwestern pool · Last updated: March 16, 2026
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// BRACKET DATA — ALL 67 GAMES
+// ═══════════════════════════════════════
+const BRACKET = {
+  west: {
+    name:"WEST",color:"#CC0033",champion:"Arizona",
+    r64:[
+      {id:"W1",t:"Arizona",b:"LIU",pick:"Arizona",note:"No contest"},
+      {id:"W2",t:"Villanova",b:"Utah State",pick:"Utah State",note:"9-seeds win 67% of 8/9 games",upset:true},
+      {id:"W3",t:"Wisconsin",b:"High Point",pick:"Wisconsin",note:"Battle-tested; beat Michigan"},
+      {id:"W4",t:"Arkansas",b:"Hawaii",pick:"Arkansas",note:"Calipari's tournament pedigree"},
+      {id:"W5",t:"BYU",b:"Texas",pick:"Texas",note:"⚡ 6/11 line is a coin flip",upset:true},
+      {id:"W6",t:"Gonzaga",b:"Kennesaw St",pick:"Gonzaga",note:"Few's system too strong"},
+      {id:"W7",t:"Miami FL",b:"Missouri",pick:"Miami FL",note:"Miami talent edge"},
+      {id:"W8",t:"Purdue",b:"Queens",pick:"Purdue",note:"Smith & Loyer firepower"},
+    ],
+    r32:[
+      {id:"W9",t:"Arizona",b:"Utah State",pick:"Arizona",note:"Size mismatch dominates"},
+      {id:"W10",t:"Arkansas",b:"Wisconsin",pick:"Arkansas",note:"Calipari outcoaches Gard"},
+      {id:"W11",t:"Gonzaga",b:"Texas",pick:"Gonzaga",note:"Few controls tempo"},
+      {id:"W12",t:"Purdue",b:"Miami FL",pick:"Purdue",note:"Boilermakers' shooting wins"},
+    ],
+    s16:[
+      {id:"W13",t:"Arizona",b:"Arkansas",pick:"Arizona",note:"7-deep scoring overwhelms"},
+      {id:"W14",t:"Purdue",b:"Gonzaga",pick:"Purdue",note:"Loyer shoots Zags out"},
+    ],
+    e8:[{id:"W15",t:"Arizona",b:"Purdue",pick:"Arizona",note:"Lloyd breaks through, Painter fades"}],
+  },
+  east: {
+    name:"EAST",color:"#003087",champion:"Duke",
+    r64:[
+      {id:"E1",t:"Duke",b:"Siena",pick:"Duke",note:"Boozer dominates"},
+      {id:"E2",t:"Ohio State",b:"TCU",pick:"TCU",note:"9-seed advantage holds",upset:true},
+      {id:"E3",t:"St. John's",b:"N. Iowa",pick:"St. John's",note:"Pitino's defense stifles"},
+      {id:"E4",t:"Kansas",b:"Cal Baptist",pick:"Kansas",note:"Self's pedigree holds"},
+      {id:"E5",t:"Louisville",b:"S. Florida",pick:"S. Florida",note:"⚡ USF 11-game win streak",upset:true},
+      {id:"E6",t:"Michigan St",b:"N. Dakota St",pick:"Michigan St",note:"Mr. March begins"},
+      {id:"E7",t:"UCLA",b:"UCF",pick:"UCLA",note:"Bruins surging (7-1 ATS)"},
+      {id:"E8",t:"UConn",b:"Furman",pick:"UConn",note:"Hurley reloaded"},
+    ],
+    r32:[
+      {id:"E9",t:"Duke",b:"TCU",pick:"Duke",note:"Boozer too much for TCU"},
+      {id:"E10",t:"St. John's",b:"Kansas",pick:"St. John's",note:"⚡ Pitino on a heater",upset:true},
+      {id:"E11",t:"Michigan St",b:"S. Florida",pick:"Michigan St",note:"Izzo grinds it out"},
+      {id:"E12",t:"UConn",b:"UCLA",pick:"UConn",note:"Hurley's DNA prevails"},
+    ],
+    s16:[
+      {id:"E13",t:"Duke",b:"St. John's",pick:"Duke",note:"Boozer best game of tourney"},
+      {id:"E14",t:"UConn",b:"Michigan St",pick:"UConn",note:"Hurley out-adjusts Izzo — barely"},
+    ],
+    e8:[{id:"E15",t:"Duke",b:"UConn",pick:"Duke",note:"Scheyer vs Hurley — Boozer is difference"}],
+  },
+  midwest: {
+    name:"MIDWEST",color:"#FFCB05",textColor:"#00274C",champion:"Michigan",
+    r64:[
+      {id:"M1",t:"Michigan",b:"Howard",pick:"Michigan",note:"Size advantage absurd"},
+      {id:"M2",t:"Georgia",b:"Saint Louis",pick:"Saint Louis",note:"⚡ Billikens senior-loaded",upset:true},
+      {id:"M3",t:"Texas Tech",b:"Akron",pick:"Akron",note:"⚡ 12/5 classic! Akron lights out",upset:true},
+      {id:"M4",t:"Alabama",b:"Hofstra",pick:"Alabama",note:"Bama talent wins, Hofstra covers"},
+      {id:"M5",t:"Tennessee",b:"SMU",pick:"SMU",note:"⚡ 6/11 coin flip, SMU push",upset:true},
+      {id:"M6",t:"Virginia",b:"Wright State",pick:"Virginia",note:"Pack-line D smothers"},
+      {id:"M7",t:"Kentucky",b:"Santa Clara",pick:"Santa Clara",note:"⚡ KY 21-13, Sendek savvy",upset:true},
+      {id:"M8",t:"Iowa State",b:"Tennessee St",pick:"Iowa State",note:"Momcilovic handles it"},
+    ],
+    r32:[
+      {id:"M9",t:"Michigan",b:"Saint Louis",pick:"Michigan",note:"Lendeborg & Mara size crushes"},
+      {id:"M10",t:"Alabama",b:"Akron",pick:"Alabama",note:"Akron's run ends vs SEC talent"},
+      {id:"M11",t:"Virginia",b:"SMU",pick:"Virginia",note:"Bennett slows it, SMU can't score"},
+      {id:"M12",t:"Iowa State",b:"Santa Clara",pick:"Iowa State",note:"Cyclones regroup"},
+    ],
+    s16:[
+      {id:"M13",t:"Michigan",b:"Alabama",pick:"Michigan",note:"Michigan D stifles Bama chaos"},
+      {id:"M14",t:"Virginia",b:"Iowa State",pick:"Virginia",note:"Bennett strangles ISU offense"},
+    ],
+    e8:[{id:"M15",t:"Michigan",b:"Virginia",pick:"Michigan",note:"Size too much for pack-line"}],
+  },
+  south: {
+    name:"SOUTH",color:"#C8102E",champion:"Houston",
+    r64:[
+      {id:"S1",t:"Florida",b:"Lehigh",pick:"Florida",note:"Defending champs cruise"},
+      {id:"S2",t:"Clemson",b:"Iowa",pick:"Clemson",note:"Clemson D holds"},
+      {id:"S3",t:"Vanderbilt",b:"McNeese St",pick:"Vanderbilt",note:"Vandy is KenPom #12"},
+      {id:"S4",t:"Nebraska",b:"Troy",pick:"Nebraska",note:"Huskers make history"},
+      {id:"S5",t:"North Carolina",b:"VCU",pick:"VCU",note:"⚡ UNC missing Wilson, VCU A-10 champ",upset:true},
+      {id:"S6",t:"Illinois",b:"Penn",pick:"Illinois",note:"Illini talent gap too wide"},
+      {id:"S7",t:"Saint Mary's",b:"Texas A&M",pick:"Saint Mary's",note:"Gaels defense holds"},
+      {id:"S8",t:"Houston",b:"Idaho",pick:"Houston",note:"Sampson's machine rolls"},
+    ],
+    r32:[
+      {id:"S9",t:"Florida",b:"Clemson",pick:"Florida",note:"Haugh & Chinyelu dominate"},
+      {id:"S10",t:"Vanderbilt",b:"Nebraska",pick:"Vanderbilt",note:"⚡ Vandy ceiling higher",upset:true},
+      {id:"S11",t:"Illinois",b:"VCU",pick:"Illinois",note:"VCU run ends vs Big Ten"},
+      {id:"S12",t:"Houston",b:"Saint Mary's",pick:"Houston",note:"Sampson D suffocates"},
+    ],
+    s16:[
+      {id:"S13",t:"Florida",b:"Vanderbilt",pick:"Florida",note:"Golden's championship experience"},
+      {id:"S14",t:"Houston",b:"Illinois",pick:"Houston",note:"Flemings explodes"},
+    ],
+    e8:[{id:"S15",t:"Florida",b:"Houston",pick:"Houston",note:"⚡ Sampson 3rd straight title game"}],
+  }
+};
+
+const FINAL_FOUR = [
+  {id:"FF1",t:"Arizona",b:"Duke",pick:"Arizona",note:"Arizona's 7-deep attack wears down injury-depleted Duke"},
+  {id:"FF2",t:"Michigan",b:"Houston",pick:"Michigan",note:"Wolverines' massive frontcourt overwhelms Houston in paint"},
+  {id:"FF3",t:"Arizona",b:"Michigan",pick:"Arizona",score:"Arizona 74, Michigan 68",note:"Lloyd's deepest team breaks through. Bradley & Burries control tempo. Peat wins MOP."},
+];
+
+// ═══════════════════════════════════════
+// RESULTS TRACKING (localStorage)
+// ═══════════════════════════════════════
+function getResults(){
+  try{return JSON.parse(localStorage.getItem('bracket2026_results')||'{}')}catch(e){return{}}
+}
+function setResult(gameId,winner){
+  const r=getResults();r[gameId]=winner;
+  localStorage.setItem('bracket2026_results',JSON.stringify(r));
+  render();
+}
+function resetResults(){
+  if(confirm('Reset all entered results?')){localStorage.removeItem('bracket2026_results');render()}
+}
+function updateTracker(){
+  const results=getResults();
+  const allGames=[];
+  Object.values(BRACKET).forEach(reg=>{
+    ['r64','r32','s16','e8'].forEach(rd=>{reg[rd].forEach(g=>allGames.push(g))});
+  });
+  FINAL_FOUR.forEach(g=>allGames.push(g));
+  let correct=0,wrong=0,pending=0;
+  allGames.forEach(g=>{
+    if(results[g.id]){
+      if(results[g.id]===g.pick)correct++;else wrong++;
+    }else pending++;
+  });
+  document.getElementById('t-correct').textContent=correct||'—';
+  document.getElementById('t-wrong').textContent=wrong||'—';
+  document.getElementById('t-pending').textContent=pending;
+  const total=correct+wrong;
+  document.getElementById('t-pct').textContent=total>0?Math.round(correct/total*100)+'%':'—';
+}
+
+// ═══════════════════════════════════════
+// RENDERING
+// ═══════════════════════════════════════
+let currentView='regions';
+const views=['regions','final four','strategy'];
+
+function render(){
+  updateTracker();
+  // Nav
+  const nav=document.getElementById('nav');
+  nav.innerHTML=views.map(v=>`<button class="${v===currentView?'active':''}" onclick="switchView('${v}')">${v}</button>`).join('');
+  const content=document.getElementById('content');
+  if(currentView==='regions')renderRegions(content);
+  else if(currentView==='final four')renderFinalFour(content);
+  else renderStrategy(content);
+}
+
+function switchView(v){currentView=v;render()}
+
+function renderGame(g){
+  const results=getResults();
+  const actual=results[g.id];
+  let cls='game';
+  if(g.upset)cls+=' upset';
+  if(actual){cls+=actual===g.pick?' correct':' wrong'}
+  const tPicked=g.pick===g.t;
+  const bPicked=g.pick===g.b;
+  const tActual=actual===g.t;
+  const bActual=actual===g.b;
+  let html=`<div class="${cls}"><div class="game-teams">`;
+  html+=`<div class="team ${tPicked?'picked':'not-picked'}">${g.t}`;
+  if(actual){html+=` <span class="actual-result ${tActual?'w':'l'}">${tActual?'W':'L'}</span>`}
+  html+=`</div>`;
+  html+=`<div class="team ${bPicked?'picked':'not-picked'}">${g.b}`;
+  if(actual){html+=` <span class="actual-result ${bActual?'w':'l'}">${bActual?'W':'L'}</span>`}
+  html+=`</div></div>`;
+  if(g.upset)html+=`<span class="upset-badge">⚡ UPSET PICK</span>`;
+  if(g.note)html+=`<div class="game-note">${g.note}</div>`;
+  if(!actual){
+    html+=`<div class="result-controls"><span style="font-size:9px;color:var(--dimmer);margin-right:4px">Result:</span>`;
+    html+=`<button onclick="setResult('${g.id}','${g.t.replace(/'/g,"\\'")}')">${g.t.split(' ').pop()}</button>`;
+    html+=`<button onclick="setResult('${g.id}','${g.b.replace(/'/g,"\\'")}')">${g.b.split(' ').pop()}</button>`;
+    html+=`</div>`;
+  }else{
+    html+=`<div class="result-controls"><button class="set" onclick="setResult('${g.id}','${actual.replace(/'/g,"\\'")}')">✓ ${actual}</button>`;
+    html+=`<button onclick="if(confirm('Clear?')){const r=getResults();delete r['${g.id}'];localStorage.setItem('bracket2026_results',JSON.stringify(r));render()}">✕</button></div>`;
+  }
+  html+=`</div>`;
+  return html;
+}
+
+function renderRegions(el){
+  let html=`<div class="regions-grid">`;
+  ['west','east','midwest','south'].forEach(key=>{
+    const reg=BRACKET[key];
+    html+=`<div class="region"><div class="region-header" style="background:${reg.color};color:${reg.textColor||'#fff'}">`;
+    html+=`<span>${reg.name}</span><span>→ ${reg.champion}</span></div>`;
+    html+=`<div class="region-body">`;
+    const rounds=[['r64','Round of 64'],['r32','Round of 32'],['s16','Sweet 16'],['e8','Elite Eight']];
+    rounds.forEach(([rd,label])=>{
+      html+=`<div class="round-label">${label}</div>`;
+      reg[rd].forEach(g=>{html+=renderGame(g)});
+    });
+    html+=`</div></div>`;
+  });
+  html+=`</div>`;
+  el.innerHTML=html;
+}
+
+function renderFinalFour(el){
+  let html=`<div class="ff-container">`;
+  html+=`<div class="ff-card">`;
+  html+=`<div class="ff-label" style="color:var(--gold)">Final Four — Lucas Oil Stadium, Indianapolis</div>`;
+  html+=`<div style="font-size:11px;color:var(--dim);margin-bottom:16px">Saturday, April 4, 2026</div>`;
+  
+  // Semi 1
+  html+=`<div style="font-size:10px;color:var(--dimmer);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Semifinal 1 — West vs East</div>`;
+  html+=`<div class="ff-matchup">`;
+  html+=`<div class="ff-team winner">1 Arizona (West) <span style="font-size:11px;color:var(--dimmer)">W</span></div>`;
+  html+=`<div class="ff-team loser">1 Duke (East)</div>`;
+  html+=`<div class="ff-note">${FINAL_FOUR[0].note}</div>`;
+  html+=renderGame(FINAL_FOUR[0]).replace('game','game');
+  html+=`</div>`;
+  
+  // Semi 2
+  html+=`<div style="font-size:10px;color:var(--dimmer);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;margin-top:12px">Semifinal 2 — Midwest vs South</div>`;
+  html+=`<div class="ff-matchup">`;
+  html+=`<div class="ff-team winner">1 Michigan (Midwest) <span style="font-size:11px;color:var(--dimmer)">W</span></div>`;
+  html+=`<div class="ff-team loser">2 Houston (South)</div>`;
+  html+=`<div class="ff-note">${FINAL_FOUR[1].note}</div>`;
+  html+=renderGame(FINAL_FOUR[1]);
+  html+=`</div>`;
+  
+  // Championship
+  html+=`<div class="championship">`;
+  html+=`<div class="ff-label" style="color:var(--gold)">🏆 National Championship — April 6</div>`;
+  html+=`<div class="champ-score">Arizona 74, Michigan 68</div>`;
+  html+=`<div class="champ-detail">${FINAL_FOUR[2].note}</div>`;
+  html+=renderGame(FINAL_FOUR[2]);
+  html+=`</div></div>`;
+
+  // Paths
+  html+=`<div class="ff-card">`;
+  html+=`<div class="ff-label">Final Four Paths</div>`;
+  const paths=[
+    {team:"Arizona",seed:"1 (West)",route:"LIU → Utah St → Arkansas → Purdue → Duke → Michigan",color:"var(--arizona)"},
+    {team:"Duke",seed:"1 (East)",route:"Siena → TCU → St. John's → UConn → falls to Arizona",color:"var(--duke)"},
+    {team:"Michigan",seed:"1 (Midwest)",route:"Howard → Saint Louis → Alabama → Virginia → Houston → falls to Arizona",color:"var(--michigan)",tc:"#00274C"},
+    {team:"Houston",seed:"2 (South)",route:"Idaho → Saint Mary's → Illinois → Florida → falls to Michigan",color:"var(--houston)"},
+  ];
+  paths.forEach(p=>{
+    html+=`<div class="path-item" style="border-color:${p.color}">`;
+    html+=`<div class="path-team" style="color:${p.tc||'#fff'}">${p.team} <span style="font-weight:400;color:var(--dim)">(${p.seed})</span></div>`;
+    html+=`<div class="path-route">${p.route}</div></div>`;
+  });
+  html+=`</div></div>`;
+  el.innerHTML=html;
+}
+
+function renderStrategy(el){
+  let html=`<div class="strategy-container">`;
+  
+  html+=`<div class="strat-card"><div class="strat-title">🎯 Champion — Arizona (+400)</div><div class="strat-body">`;
+  html+=`<p><strong>Why Arizona:</strong> Deepest scoring in the field (7 players avg 8.7+ PPG). Won Big 12 regular season AND tournament. Beat Florida, UConn, Alabama, Auburn, Houston in nonconference. Easiest 1-seed regional path. Tommy Lloyd's best team by far — 144-35 career, fastest to 144 wins in D-I history.</p>`;
+  html+=`<p><strong>The risk:</strong> Lloyd has 0 Final Fours in 4 tournament appearances. Lost to 15-seed Princeton in 2023. But this roster is markedly deeper and more talented than any previous team.</p>`;
+  html+=`</div></div>`;
+  
+  html+=`<div class="strat-card"><div class="strat-title">🧠 Pool Differentiation Strategy</div><div class="strat-body">`;
+  html+=`<p><strong>Your pool:</strong> Northwestern grads, mid-40s, from Midwest/Northeast/PNW. They will overweight Michigan (Big Ten loyalty), Duke (brand prestige), and UConn (back-to-back champ mystique).</p>`;
+  html+=`<p><strong>Michigan has the highest public betting handle in the nation.</strong> Your pool will mirror this. Picking Arizona means if they win, you almost certainly win the pool outright.</p>`;
+  html+=`<p><strong>Keeping Michigan in the Final Four</strong> hedges your bias while still differentiating at the champion level.</p>`;
+  html+=`</div></div>`;
+  
+  html+=`<div class="strat-card"><div class="strat-title">⚡ Upset Portfolio (9 First-Round + 2 Second-Round)</div><div class="strat-body">`;
+  html+=`<p><strong>Data-driven upset picks:</strong> 6/11 matchups are historically 50-50. 12/5 upsets happen 33% of the time. 9-seeds beat 8-seeds 67%. Turnover rate is the #1 upset predictor — each 1% increase in TO rate raises upset odds by 42%.</p>`;
+  html+=`</div>`;
+  html+=`<div class="upset-grid">`;
+  [{r:"Round of 64",c:"9 upsets",p:"28% of games"},{r:"Round of 32",c:"2 upsets",p:"13% of games"},{r:"Sweet 16",c:"0 upsets",p:"Chalk holds"},{r:"Elite 8",c:"1 upset",p:"Houston > Florida"}].forEach(u=>{
+    html+=`<div class="upset-stat"><div class="val">${u.c}</div><div class="lbl">${u.r} · ${u.p}</div></div>`;
+  });
+  html+=`</div></div>`;
+  
+  html+=`<div class="strat-card"><div class="strat-title">💰 Sharp Money Alignment</div><div class="strat-body">`;
+  html+=`<p><strong>Houston:</strong> $50K+ single wagers at BetMGM. Sharp money loves Sampson's defense. We have them reaching the title game from the South, which aligns with sharps over public money on Florida.</p>`;
+  html+=`<p><strong>Purdue:</strong> $100K Final Four wager at BetMGM. We have them in the Elite Eight (losing to Arizona). Painter's March track record remains the fade.</p>`;
+  html+=`<p><strong>Arizona at +400:</strong> Better value than Michigan (+350) or Duke (+330) given the path difficulty differences.</p>`;
+  html+=`</div></div>`;
+  
+  html+=`<div class="strat-card"><div class="strat-title">📊 Final Score Logic — Arizona 74, Michigan 68</div><div class="strat-body">`;
+  html+=`<p>Arizona's balance (multiple scorers in double figures) outpaces Michigan's size advantage. Michigan's Cason injury limits PG depth; Cadeau tires in 2nd half. Koa Peat (14 pts, 8 reb) wins MOP with a dominant second half. Arizona shoots 38% from 3 to spread Michigan's bigs. Game turns on a 12-2 Arizona run midway through the 2nd half.</p>`;
+  html+=`</div></div>`;
+  
+  html+=`</div>`;
+  el.innerHTML=html;
+}
+
+function shareBracket(){
+  const text=`🏀 My 2026 March Madness Bracket\n\n🏆 Champion: Arizona 74, Michigan 68\n\nFinal Four:\n• Arizona (West 1)\n• Duke (East 1)\n• Michigan (Midwest 1)\n• Houston (South 2)\n\n⚡ Bold Picks:\n• Akron over Texas Tech (12/5)\n• St. John's over Kansas (R32)\n• Houston over Florida (E8)\n• Santa Clara over Kentucky\n• VCU over UNC\n\n9 first-round upsets · Data-driven picks`;
+  navigator.clipboard.writeText(text).then(()=>alert('Bracket summary copied to clipboard!')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert('Copied!');
+  });
+}
+
+// Init
+render();
+</script>
+</body>
+</html>
